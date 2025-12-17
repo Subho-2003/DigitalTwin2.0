@@ -1,0 +1,74 @@
+<!-- Alternative: Vapi Official Widget Approach -->
+<!-- This handles all CDN/dependency issues automatically -->
+<!-- Copy this code to replace the script section in voiceChat.html if CDN issues persist -->
+
+<script>
+  var vapiInstance = null;
+  const assistant = "99fb9a3d-f701-494e-9acb-073f9ed4be14"; // Your assistant ID
+  const apiKey = "34f0859f-e2f6-4fea-a9a9-6d7e0eb28c47"; // Your PUBLIC_API_KEY
+  
+  // Store transcript
+  let fullTranscript = [];
+  
+  (function (d, t) {
+    var g = document.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+    g.defer = true;
+    g.async = true;
+    s.parentNode.insertBefore(g, s);
+    g.onload = function () {
+      vapiInstance = window.vapiSDK.run({
+        apiKey: apiKey,
+        assistant: assistant,
+        config: {
+          // Customize widget appearance
+          button: {
+            // You can hide the default button and use your own
+            // Or customize the default button
+          }
+        }
+      });
+      
+      // Set up event listeners
+      if (vapiInstance) {
+        vapiInstance.on('call-start', () => {
+          console.log('Call started');
+          fullTranscript = [];
+          // Update your UI
+        });
+        
+        vapiInstance.on('call-end', async () => {
+          console.log('Call ended');
+          // Save transcript to backend
+          await saveConversationToBackend();
+        });
+        
+        vapiInstance.on('message', (msg) => {
+          if (msg.type === 'transcript') {
+            fullTranscript.push(`${msg.role}: ${msg.transcript}\n`);
+            // Update your UI
+          }
+        });
+      }
+    };
+  })(document, "script");
+  
+  // Your custom start/stop functions
+  window.startVoiceSession = function() {
+    if (vapiInstance) {
+      vapiInstance.start();
+    }
+  };
+  
+  window.stopVoiceSession = function() {
+    if (vapiInstance) {
+      vapiInstance.stop();
+    }
+  };
+  
+  async function saveConversationToBackend() {
+    // Your existing save function
+  }
+</script>
+

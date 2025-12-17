@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twin Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+            overflow-x: hidden;
+        }
+        
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(139, 92, 246, 0.25);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+        
+        .slider-container {
+            position: relative;
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 8px;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.3) 0%, rgba(34, 211, 238, 0.3) 100%);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.9);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.9);
+        }
+        
+        .slider:active::-webkit-slider-thumb {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 1);
+        }
+        
+        .slider:active::-moz-range-thumb {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 1);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 32px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+        
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(28px);
+        }
+        
+        .mode-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        
+        .mode-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 12px 48px rgba(139, 92, 246, 0.3);
+        }
+        
+        .mode-card.selected {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.15);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+        }
+        
+        .preview-box {
+            background: rgba(10, 14, 39, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .language-option {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .language-option:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .language-option.selected {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.2);
+        }
+        
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-link:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 3px solid #8b5cf6;
+            padding-left: 1.25rem;
+        }
+        
+        .sidebar-link.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-left: 3px solid #8b5cf6;
+            padding-left: 1.25rem;
+        }
+    </style>
+</head>
+<body style="height: auto; min-height: 100%;" class="text-gray-100">
+    <div class="flex min-h-screen">
+        <aside class="w-64 flex flex-col border-r border-gray-800">
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">AI Twin</h1>
+                        <p class="text-xs text-gray-400">Neural Interface</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="dashboard.html" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300">
+                    <i class="fas fa-home w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="voiceChat.html" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300">
+                    <i class="fas fa-microphone w-5"></i>
+                    <span>Live Voice Chat</span>
+                </a>
+                <a href="#" class="sidebar-link active flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Twin Settings</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300">
+                    <i class="fas fa-brain w-5"></i>
+                    <span>Memory Bank</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            
+            <div class="p-4 border-t border-gray-800">
+                <div class="flex items-center space-x-3 px-4 py-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500"></div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-200">Alex Chen</p>
+                        <p class="text-xs text-gray-400">Premium User</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="flex-1 flex flex-col">
+            <header class="h-16 border-b border-gray-800 flex items-center justify-between px-8">
+                <div>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Twin Settings</h2>
+                    <p class="text-sm text-gray-400">Customize your AI twin's personality and behavior</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="px-4 py-2 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 text-white font-medium hover:shadow-lg hover:shadow-violet-500/50 transition-all">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </div>
+            </header>
+            
+            <div class="flex-1 p-8 space-y-6 overflow-auto">
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                            <i class="fas fa-sliders-h text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Personality Controls</h3>
+                            <p class="text-sm text-gray-400">Adjust your twin's communication style</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="slider-container">
+                            <div class="flex justify-between mb-3">
+                                <span class="text-sm font-medium text-violet-400">Emotional</span>
+                                <span class="text-sm font-medium text-cyan-400">Logical</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="slider" id="emotionalSlider">
+                            <div class="text-center mt-2">
+                                <span class="text-xs text-gray-400">Current: <span id="emotionalValue" class="text-violet-400 font-medium">50%</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="slider-container">
+                            <div class="flex justify-between mb-3">
+                                <span class="text-sm font-medium text-violet-400">Casual</span>
+                                <span class="text-sm font-medium text-cyan-400">Professional</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="slider" id="professionalSlider">
+                            <div class="text-center mt-2">
+                                <span class="text-xs text-gray-400">Current: <span id="professionalValue" class="text-violet-400 font-medium">50%</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-box rounded-xl p-4 mt-6">
+                            <p class="text-xs text-gray-400 mb-2">Live Preview:</p>
+                            <p class="text-sm text-gray-200" id="previewText">Hey there! I'm here to help you with whatever you need. Let's work together on this!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                            <i class="fas fa-database text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Memory Behavior</h3>
+                            <p class="text-sm text-gray-400">Control how your twin remembers conversations</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-gray-900/30">
+                            <div>
+                                <p class="font-medium text-white">Auto-save conversations</p>
+                                <p class="text-sm text-gray-400">Automatically store all chat history</p>
+                            </div>
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-gray-900/30">
+                            <div>
+                                <p class="font-medium text-white">Memory importance weighting</p>
+                                <p class="text-sm text-gray-400">Prioritize important information</p>
+                            </div>
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Twin Mode</h3>
+                            <p class="text-sm text-gray-400">Choose your AI twin's operating mode</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="mode-card selected rounded-xl p-6" onclick="selectMode(this)">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                                    <i class="fas fa-magic text-white"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Assistant Mode</h4>
+                            </div>
+                            <p class="text-sm text-gray-400">Proactive, helpful, and task-oriented. Your twin anticipates needs and offers suggestions.</p>
+                            <div class="mt-4 flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                <span class="text-xs text-green-400">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mode-card rounded-xl p-6" onclick="selectMode(this)">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                    <i class="fas fa-book text-white"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Legacy Mode</h4>
+                            </div>
+                            <p class="text-sm text-gray-400">Classic, responsive, and focused. Your twin responds only when prompted.</p>
+                            <div class="mt-4 flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-gray-500"></div>
+                                <span class="text-xs text-gray-400">Inactive</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                            <i class="fas fa-language text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Language & Voice Preferences</h3>
+                            <p class="text-sm text-gray-400">Set your preferred language and voice settings</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-3">Default Response Language</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="language-option selected rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇺🇸</div>
+                                    <p class="text-sm font-medium text-white">English</p>
+                                </div>
+                                <div class="language-option rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇪🇸</div>
+                                    <p class="text-sm font-medium text-white">Spanish</p>
+                                </div>
+                                <div class="language-option rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇫🇷</div>
+                                    <p class="text-sm font-medium text-white">French</p>
+                                </div>
+                                <div class="language-option rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇩🇪</div>
+                                    <p class="text-sm font-medium text-white">German</p>
+                                </div>
+                                <div class="language-option rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇯🇵</div>
+                                    <p class="text-sm font-medium text-white">Japanese</p>
+                                </div>
+                                <div class="language-option rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇨🇳</div>
+                                    <p class="text-sm font-medium text-white">Chinese</p>
+                                </div>
+                                <div class="language-option rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇰🇷</div>
+                                    <p class="text-sm font-medium text-white">Korean</p>
+                                </div>
+                                <div class="language-option rounded-lg p-3 text-center" onclick="selectLanguage(this)">
+                                    <div class="text-2xl mb-2">🇮🇹</div>
+                                    <p class="text-sm font-medium text-white">Italian</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4">
+                            <label class="block text-sm font-medium text-gray-300 mb-3">Voice Settings</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-gray-900/30">
+                                    <p class="text-sm font-medium text-white mb-2">Voice Type</p>
+                                    <select class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-violet-500/30 text-white focus:outline-none focus:border-violet-500">
+                                        <option>Natural (Default)</option>
+                                        <option>Professional</option>
+                                        <option>Friendly</option>
+                                        <option>Energetic</option>
+                                    </select>
+                                </div>
+                                <div class="p-4 rounded-xl bg-gray-900/30">
+                                    <p class="text-sm font-medium text-white mb-2">Speech Speed</p>
+                                    <select class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-violet-500/30 text-white focus:outline-none focus:border-violet-500">
+                                        <option>Slow</option>
+                                        <option>Normal (Default)</option>
+                                        <option>Fast</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        const emotionalSlider = document.getElementById('emotionalSlider');
+        const professionalSlider = document.getElementById('professionalSlider');
+        const emotionalValue = document.getElementById('emotionalValue');
+        const professionalValue = document.getElementById('professionalValue');
+        const previewText = document.getElementById('previewText');
+        
+        const previewTexts = {
+            emotional_casual: "Hey! I'm so excited to help you out! Let's make this awesome together! 😊",
+            emotional_professional: "I'm delighted to assist you with this matter. I'm confident we can achieve excellent results.",
+            logical_casual: "Sure thing! Here's what we need to do. Let me break it down for you.",
+            logical_professional: "I will assist you with this task. Here is the systematic approach we should follow."
+        };
+        
+        function updatePreview() {
+            const emotional = parseInt(emotionalSlider.value);
+            const professional = parseInt(professionalSlider.value);
+            
+            let key;
+            if (emotional < 50 && professional < 50) {
+                key = 'emotional_casual';
+            } else if (emotional < 50 && professional >= 50) {
+                key = 'emotional_professional';
+            } else if (emotional >= 50 && professional < 50) {
+                key = 'logical_casual';
+            } else {
+                key = 'logical_professional';
+            }
+            
+            previewText.style.opacity = '0';
+            setTimeout(() => {
+                previewText.textContent = previewTexts[key];
+                previewText.style.opacity = '1';
+            }, 200);
+        }
+        
+        emotionalSlider.addEventListener('input', function() {
+            emotionalValue.textContent = this.value + '%';
+            updatePreview();
+        });
+        
+        professionalSlider.addEventListener('input', function() {
+            professionalValue.textContent = this.value + '%';
+            updatePreview();
+        });
+        
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+        
+        function selectMode(element) {
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+        
+        function selectLanguage(element) {
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+    </script>
+</body>
+</html>

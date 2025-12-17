@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en" style="height: auto; min-height: 100%; scroll-behavior: smooth;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyDigitalTwin - Your AI Digital Twin Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        body { background: #0a0a0f; overflow-x: hidden; scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; }
+        .gradient-bg { background: linear-gradient(135deg, #0a0a0f 0%, #1a0b2e 50%, #0f0a1f 100%); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glow-purple { box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); }
+        .glow-cyan { box-shadow: 0 0 30px rgba(34, 211, 238, 0.4); }
+        .text-gradient { background: linear-gradient(135deg, #a855f7 0%, #22d3ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .btn-primary { background: linear-gradient(135deg, #a855f7 0%, #22d3ee 100%); transition: all 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(168, 85, 247, 0.5); }
+        .card-hover { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-10px) rotateX(5deg); box-shadow: 0 20px 60px rgba(168, 85, 247, 0.3); }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        .float-animation { animation: float 6s ease-in-out infinite; }
+        @keyframes particle { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 50% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } }
+        .particle { position: absolute; width: 4px; height: 4px; background: radial-gradient(circle, #a855f7, transparent); border-radius: 50%; animation: particle 4s infinite; }
+        .particle:nth-child(1) { --tx: 100px; --ty: -100px; top: 20%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { --tx: -80px; --ty: -120px; top: 40%; left: 80%; animation-delay: 1s; }
+        .particle:nth-child(3) { --tx: 120px; --ty: 100px; top: 60%; left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { --tx: -100px; --ty: 80px; top: 80%; left: 70%; animation-delay: 3s; }
+        .typing-dot { animation: typing 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+        .scroll-indicator { animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+        .step-line { position: relative; }
+        .step-line::after { content: ''; position: absolute; top: 50%; left: 100%; width: 100%; height: 2px; background: linear-gradient(90deg, #a855f7, #22d3ee); transform: translateY(-50%); }
+        .mobile-menu { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        .mobile-menu.active { transform: translateX(0); }
+        .typewriter { overflow: hidden; border-right: 2px solid #22d3ee; white-space: nowrap; animation: typing-text 3s steps(40, end), blink-caret 0.75s step-end infinite; }
+        @keyframes typing-text { from { width: 0; } to { width: 100%; } }
+        @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: #22d3ee; } }
+        .message-appear { animation: messageSlide 0.5s ease-out forwards; opacity: 0; }
+        @keyframes messageSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .typing-indicator { display: inline-flex; align-items: center; }
+    </style>
+</head>
+<body style="height: auto; min-height: 100%;" class="gradient-bg text-white">
+    <div x-data="{ 
+        mobileMenuOpen: false, 
+        scrolled: false,
+        userMessageVisible: false,
+        aiMessageVisible: false,
+        typingVisible: false,
+        showTypingIndicator: false
+    }" 
+    @scroll.window="scrolled = window.pageYOffset > 50"
+    x-init="
+        setTimeout(() => { userMessageVisible = true; }, 1000);
+        setTimeout(() => { showTypingIndicator = true; }, 2000);
+        setTimeout(() => { showTypingIndicator = false; aiMessageVisible = true; }, 4000);
+    ">
+        <!-- Header -->
+        <header :class="scrolled ? 'glass shadow-2xl' : ''" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center">
+                            <i class="fas fa-user-astronaut text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gradient">MyDigitalTwin</span>
+                    </div>
+                    
+                    <!-- Desktop Navigation -->
+                    <div class="hidden lg:flex items-center space-x-8">
+                        <a href="#home" class="text-gray-300 hover:text-white transition">Home</a>
+                        <a href="#features" class="text-gray-300 hover:text-white transition">Features</a>
+                        <a href="#how-it-works" class="text-gray-300 hover:text-white transition">How It Works</a>
+                        <a href="#demo" class="text-gray-300 hover:text-white transition">Demo</a>
+                        <a href="#privacy" class="text-gray-300 hover:text-white transition">Privacy</a>
+                        <a href="#contact" class="text-gray-300 hover:text-white transition">Contact</a>
+                    </div>
+                    
+                    <div class="hidden lg:block">
+                        <a href="login.html" class="btn-primary px-6 py-3 rounded-full font-semibold glow-purple">
+                            Try Your Twin
+                        </a>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden text-white text-2xl">
+                        <i :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'" class="fas"></i>
+                    </button>
+                </div>
+            </nav>
+            
+            <!-- Mobile Menu -->
+            <div :class="mobileMenuOpen ? 'active' : ''" class="mobile-menu fixed top-0 right-0 w-64 h-screen glass z-50 lg:hidden">
+                <div class="flex flex-col p-6 space-y-6 mt-16">
+                    <a href="#home" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition">Home</a>
+                    <a href="#features" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition">Features</a>
+                    <a href="#how-it-works" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition">How It Works</a>
+                    <a href="#demo" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition">Demo</a>
+                    <a href="#privacy" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition">Privacy</a>
+                    <a href="#contact" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition">Contact</a>
+                        <a href="login.html" class="btn-primary px-6 py-3 rounded-full font-semibold glow-purple w-full">
+                        Try Your Twin
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right" data-aos-duration="1000">
+                        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight">
+                            Meet Your AI <span class="text-gradient">Digital Twin</span>
+                        </h1>
+                        <p class="text-xl sm:text-2xl text-gray-300 mb-8 leading-relaxed">
+                            A living, learning AI that talks, listens, remembers, and evolves — just like you.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="login.html" class="btn-primary px-8 py-4 rounded-full font-semibold text-lg glow-purple flex items-center justify-center">
+                                <i class="fas fa-rocket mr-2"></i> Create My Twin
+                            </a>
+                            <button class="glass px-8 py-4 rounded-full font-semibold text-lg hover:bg-white/10 transition flex items-center justify-center">
+                                <i class="fas fa-play-circle mr-2"></i> Watch Demo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div data-aos="fade-left" data-aos-duration="1000" class="relative">
+                        <div class="float-animation">
+                            <div class="relative w-full max-w-md mx-auto">
+                                <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full blur-3xl opacity-30"></div>
+                                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=600&fit=crop" alt="AI Avatar" class="relative rounded-3xl glass p-4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="#features" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 scroll-indicator cursor-pointer">
+                <i class="fas fa-chevron-down text-3xl text-purple-400"></i>
+            </a>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 sm:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div data-aos="fade-up" class="text-center mb-16">
+                    <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
+                        What Makes <span class="text-gradient">MyDigitalTwin</span> Unique?
+                    </h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Experience the future of AI companionship with features that make your digital twin truly yours.
+                    </p>
+                </div>
+                
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    <div data-aos="fade-up" data-aos-delay="100" class="glass rounded-3xl p-8 card-hover">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mb-6">
+                            <i class="fas fa-brain text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Memory That Grows</h3>
+                        <p class="text-gray-400 leading-relaxed">
+                            Remembers conversations, decisions, and experiences to become more personalized over time.
+                        </p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="200" class="glass rounded-3xl p-8 card-hover">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center mb-6">
+                            <i class="fas fa-microphone text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Human-like Voice</h3>
+                        <p class="text-gray-400 leading-relaxed">
+                            Natural speech with emotion-aware responses and voice cloning capabilities.
+                        </p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="300" class="glass rounded-3xl p-8 card-hover">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center mb-6">
+                            <i class="fas fa-globe text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Multilingual AI</h3>
+                        <p class="text-gray-400 leading-relaxed">
+                            Talks fluently in multiple languages, breaking communication barriers.
+                        </p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="400" class="glass rounded-3xl p-8 card-hover">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-700 flex items-center justify-center mb-6">
+                            <i class="fas fa-comments text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Real-Time Conversations</h3>
+                        <p class="text-gray-400 leading-relaxed">
+                            Text and voice chat with instant, intelligent replies that feel natural.
+                        </p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="500" class="glass rounded-3xl p-8 card-hover">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center mb-6">
+                            <i class="fas fa-shield-alt text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Privacy-First Design</h3>
+                        <p class="text-gray-400 leading-relaxed">
+                            Your data, your control — no public training, complete privacy guaranteed.
+                        </p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="600" class="glass rounded-3xl p-8 card-hover">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-700 flex items-center justify-center mb-6">
+                            <i class="fas fa-infinity text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Legacy Mode</h3>
+                        <p class="text-gray-400 leading-relaxed">
+                            Ethical digital presence for future generations to remember and interact with.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-20 sm:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div data-aos="fade-up" class="text-center mb-16">
+                    <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
+                        How It <span class="text-gradient">Works</span>
+                    </h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Four simple steps to create your living digital twin
+                    </p>
+                </div>
+                
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+                    <div data-aos="fade-up" data-aos-delay="100" class="relative">
+                        <div class="glass rounded-3xl p-8 text-center h-full step-line">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mx-auto mb-6 text-3xl font-black">
+                                1
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">You Talk</h3>
+                            <p class="text-gray-400">
+                                Share your thoughts through voice or text input
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="200" class="relative">
+                        <div class="glass rounded-3xl p-8 text-center h-full step-line">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center mx-auto mb-6 text-3xl font-black">
+                                2
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">AI Learns You</h3>
+                            <p class="text-gray-400">
+                                Advanced personality and memory modeling
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="300" class="relative">
+                        <div class="glass rounded-3xl p-8 text-center h-full step-line">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center mx-auto mb-6 text-3xl font-black">
+                                3
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">Twin Evolves</h3>
+                            <p class="text-gray-400">
+                                Continuous learning and adaptation over time
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="400">
+                        <div class="glass rounded-3xl p-8 text-center h-full">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-purple-700 flex items-center justify-center mx-auto mb-6 text-3xl font-black">
+                                4
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">Interact Forever</h3>
+                            <p class="text-gray-400">
+                                Your assistant and legacy for generations
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Demo Section -->
+        <section id="demo" class="py-20 sm:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right" class="order-2 lg:order-1">
+                        <div class="glass rounded-3xl p-6 sm:p-8 max-w-lg mx-auto">
+                            <div class="space-y-4">
+                                <div x-show="userMessageVisible" class="flex justify-end message-appear">
+                                    <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl rounded-tr-sm px-6 py-4 max-w-xs">
+                                        <p class="text-white">Hey, can you help me plan my day tomorrow?</p>
+                                    </div>
+                                </div>
+                                
+                                <div x-show="showTypingIndicator" class="flex justify-start message-appear">
+                                    <div class="glass rounded-2xl rounded-tl-sm px-6 py-4">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700"></div>
+                                            <div class="flex space-x-1">
+                                                <div class="w-2 h-2 bg-cyan-400 rounded-full typing-dot"></div>
+                                                <div class="w-2 h-2 bg-cyan-400 rounded-full typing-dot"></div>
+                                                <div class="w-2 h-2 bg-cyan-400 rounded-full typing-dot"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div x-show="aiMessageVisible" class="flex justify-start message-appear">
+                                    <div class="glass rounded-2xl rounded-tl-sm px-6 py-4 max-w-xs">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700"></div>
+                                            <span class="font-semibold">Your Digital Twin</span>
+                                        </div>
+                                        <p class="text-gray-300">Of course! Based on your schedule, I see you have a meeting at 10 AM. I'd recommend starting with your morning workout at 7 AM, then reviewing the presentation materials at 8:30 AM.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div data-aos="fade-left" class="order-1 lg:order-2">
+                        <h2 class="text-4xl sm:text-5xl font-black mb-6">
+                            Not just a chatbot — a <span class="text-gradient">living digital version</span> of you.
+                        </h2>
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold mb-1">Remembers context</h4>
+                                    <p class="text-gray-400">Never repeats questions or loses track of conversations</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-4">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold mb-1">Responds emotionally</h4>
+                                    <p class="text-gray-400">Understands tone, mood, and emotional nuances</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-4">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold mb-1">Speaks in your voice</h4>
+                                    <p class="text-gray-400">Voice cloning technology for authentic interactions</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="login.html" class="btn-primary px-8 py-4 rounded-full font-semibold text-lg glow-purple">
+                            <i class="fas fa-comment-dots mr-2"></i> Start Talking Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust & Privacy Section -->
+        <section id="privacy" class="py-20 sm:py-32 bg-gradient-to-b from-transparent to-purple-900/10">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div data-aos="fade-up" class="text-center mb-16">
+                    <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
+                        Trust, Ethics & <span class="text-gradient">Privacy</span>
+                    </h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Your data security and privacy are our top priorities
+                    </p>
+                </div>
+                
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                    <div data-aos="fade-up" data-aos-delay="100" class="glass rounded-3xl p-8 text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-user-check text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Consent-driven learning</h3>
+                        <p class="text-gray-400 text-sm">You control what your twin learns and remembers</p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="200" class="glass rounded-3xl p-8 text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-ban text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">No data selling</h3>
+                        <p class="text-gray-400 text-sm">Your information is never shared or monetized</p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="300" class="glass rounded-3xl p-8 text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-lock text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Secure storage</h3>
+                        <p class="text-gray-400 text-sm">Military-grade encryption protects your data</p>
+                    </div>
+                    
+                    <div data-aos="fade-up" data-aos-delay="400" class="glass rounded-3xl p-8 text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-purple-700 flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-balance-scale text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Ethical AI usage</h3>
+                        <p class="text-gray-400 text-sm">Responsible AI practices in every interaction</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 sm:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div data-aos="fade-up" class="text-center mb-16">
+                    <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
+                        Get In <span class="text-gradient">Touch</span>
+                    </h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+                    </p>
+                </div>
+                
+                <div class="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+                    <!-- Contact Form -->
+                    <div data-aos="fade-right" class="glass rounded-3xl p-8 sm:p-10">
+                        <form class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Your Name</label>
+                                <input type="text" placeholder="John Doe" class="w-full px-4 py-3 rounded-xl glass border border-white/10 focus:border-purple-500 focus:outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Email Address</label>
+                                <input type="email" placeholder="john@example.com" class="w-full px-4 py-3 rounded-xl glass border border-white/10 focus:border-purple-500 focus:outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Subject</label>
+                                <input type="text" placeholder="How can we help?" class="w-full px-4 py-3 rounded-xl glass border border-white/10 focus:border-purple-500 focus:outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Message</label>
+                                <textarea rows="5" placeholder="Tell us more about your inquiry..." class="w-full px-4 py-3 rounded-xl glass border border-white/10 focus:border-purple-500 focus:outline-none transition resize-none"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary w-full px-8 py-4 rounded-full font-semibold text-lg glow-purple">
+                                <i class="fas fa-paper-plane mr-2"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div data-aos="fade-left" class="space-y-8">
+                        <div class="glass rounded-3xl p-8">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-envelope text-xl text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold mb-2">Email Us</h4>
+                                    <p class="text-gray-400">hello@mydigitaltwin.ai</p>
+                                    <p class="text-gray-400">support@mydigitaltwin.ai</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass rounded-3xl p-8">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-phone text-xl text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold mb-2">Call Us</h4>
+                                    <p class="text-gray-400">+1 (555) 123-4567</p>
+                                    <p class="text-gray-400 text-sm">Mon-Fri 9am-6pm EST</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass rounded-3xl p-8">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-map-marker-alt text-xl text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold mb-2">Visit Us</h4>
+                                    <p class="text-gray-400">123 AI Innovation Drive</p>
+                                    <p class="text-gray-400">San Francisco, CA 94105</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass rounded-3xl p-8">
+                            <h4 class="text-xl font-bold mb-4">Follow Us</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition glow-purple">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="#" class="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition glow-purple">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition glow-purple">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                                <a href="#" class="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition glow-purple">
+                                    <i class="fab fa-discord text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="py-20 sm:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div data-aos="zoom-in" class="glass rounded-3xl p-12 sm:p-16 text-center max-w-4xl mx-auto border-2 border-purple-500/30 glow-purple">
+                    <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
+                        Your Digital Twin Starts With <span class="text-gradient">One Conversation</span>.
+                    </h2>
+                    <p class="text-xl text-gray-400 mb-8">
+                        No credit card. Your data stays private.
+                    </p>
+                    <a href="login.html" class="btn-primary px-10 py-5 rounded-full font-bold text-xl glow-purple">
+                        <i class="fas fa-rocket mr-2"></i> Create Your Twin Now
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-16 border-t border-white/10">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center">
+                                <i class="fas fa-user-astronaut text-white"></i>
+                            </div>
+                            <span class="text-xl font-bold text-gradient">MyDigitalTwin</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">
+                            Creating the future of AI companionship, one digital twin at a time.
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold mb-4">Quick Links</h4>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li><a href="#home" class="hover:text-white transition">Home</a></li>
+                            <li><a href="#features" class="hover:text-white transition">Features</a></li>
+                            <li><a href="#how-it-works" class="hover:text-white transition">How It Works</a></li>
+                            <li><a href="#demo" class="hover:text-white transition">Demo</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold mb-4">Privacy & Ethics</h4>
+                        <ul class="space-y-2 text-gray-400 text-sm">
+                            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+                            <li><a href="#" class="hover:text-white transition">Ethical AI Guidelines</a></li>
+                            <li><a href="#" class="hover:text-white transition">Data Security</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold mb-4">Newsletter</h4>
+                        <p class="text-gray-400 text-sm mb-4">Stay updated with our latest features and news.</p>
+                        <div class="flex">
+                            <input type="email" placeholder="Your email" class="flex-1 px-4 py-2 rounded-l-full glass border border-white/10 focus:border-purple-500 focus:outline-none text-sm">
+                            <button class="btn-primary px-4 py-2 rounded-r-full">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-white/10 pt-8 text-center text-gray-400 text-sm">
+                    <p>&copy; 2025 MyDigitalTwin. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+    </script>
+</body>
+</html>

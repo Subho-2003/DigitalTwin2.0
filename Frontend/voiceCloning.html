@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" style="height: auto; min-height: 100%;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Cloning - AI Laboratory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+      background-attachment: fixed;
+    }
+    
+    .glass-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .glass-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 12px 48px rgba(139, 92, 246, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .glow-button {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      box-shadow: 0 4px 24px rgba(139, 92, 246, 0.4);
+      transition: all 0.3s ease;
+    }
+    
+    .glow-button:hover {
+      box-shadow: 0 6px 32px rgba(139, 92, 246, 0.6);
+      transform: translateY(-2px);
+    }
+    
+    .waveform-bar {
+      animation: waveform 1.2s ease-in-out infinite;
+    }
+    
+    @keyframes waveform {
+      0%, 100% { height: 20%; }
+      50% { height: 100%; }
+    }
+    
+    .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+    .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+    .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
+    .waveform-bar:nth-child(6) { animation-delay: 0.3s; }
+    .waveform-bar:nth-child(7) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(8) { animation-delay: 0.1s; }
+    
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+    
+    .pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.6); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body style="height: auto; min-height: 100%;" class="text-gray-100">
+  <div class="flex min-h-screen">
+    <aside class="w-64 flex flex-col border-r border-gray-800" style="background: rgba(10, 14, 39, 0.95);">
+      <div class="p-6 border-b border-gray-800">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+            <i class="fas fa-brain text-white text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-white">VoiceAI</h1>
+            <p class="text-xs text-gray-400">Neural Studio</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all">
+          <i class="fas fa-home w-5"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="voiceChat.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all">
+          <i class="fas fa-microphone w-5"></i>
+          <span>Live Voice Chat</span>
+        </a>
+        <a href="voiceCloning.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-gradient-to-r from-violet-500/20 to-indigo-500/20 text-white border border-violet-500/30">
+          <i class="fas fa-clone w-5"></i>
+          <span>Voice Cloning</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all">
+          <i class="fas fa-waveform-lines w-5"></i>
+          <span>Voice Library</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all">
+          <i class="fas fa-chart-line w-5"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800/50 hover:text-white transition-all">
+          <i class="fas fa-cog w-5"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+      
+      <div class="p-4 border-t border-gray-800">
+        <div class="flex items-center space-x-3 px-4 py-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+            <span class="text-white font-semibold text-sm">JD</span>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-white">John Doe</p>
+            <p class="text-xs text-gray-400">Pro Account</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <div class="flex-1 flex flex-col">
+      <header class="h-16 border-b border-gray-800 flex items-center justify-between px-8" style="background: rgba(10, 14, 39, 0.95);">
+        <div class="flex items-center space-x-4">
+          <h2 class="text-xl font-semibold text-white">Voice Cloning Laboratory</h2>
+          <span class="px-3 py-1 rounded-full text-xs font-medium bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            <i class="fas fa-shield-halved mr-1"></i>End-to-end Encrypted
+          </span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="w-10 h-10 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+            <i class="fas fa-bell"></i>
+          </button>
+          <button class="w-10 h-10 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+            <i class="fas fa-question-circle"></i>
+          </button>
+        </div>
+      </header>
+      
+      <main class="flex-1 p-8 overflow-auto">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6 fade-in">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-white flex items-center">
+                  <i class="fas fa-microphone-lines text-violet-400 mr-3"></i>
+                  Voice Capture
+                </h3>
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                  Ready
+                </span>
+              </div>
+              
+              <div class="space-y-6">
+                <div class="flex items-center justify-center h-32 bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl border border-gray-700/50">
+                  <div class="flex items-end space-x-2 h-20">
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                    <div class="waveform-bar w-2 bg-gradient-to-t from-violet-500 to-cyan-400 rounded-full"></div>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-center space-x-4">
+                  <button id="recordButton" onclick="toggleRecording()" class="glow-button px-8 py-4 rounded-xl text-white font-medium flex items-center space-x-3">
+                    <i class="fas fa-circle text-red-400"></i>
+                    <span id="recordButtonText">Start Recording</span>
+                  </button>
+                </div>
+                
+                <div class="relative">
+                  <div id="uploadArea" class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-violet-500/50 transition-all cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-arrow-up text-4xl text-gray-600 mb-3"></i>
+                    <p class="text-sm text-gray-400 mb-1">Drop audio files here or click to upload</p>
+                    <p class="text-xs text-gray-500">Supported: MP3, WAV, M4A (Max 50MB)</p>
+                  </div>
+                  <input type="file" id="fileInput" accept="audio/*" style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-gray-400">Recording Quality</span>
+                    <span class="text-sm font-medium text-cyan-400">High Fidelity</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-xs text-gray-500">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Minimum 30 seconds required for optimal cloning</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-6 fade-in">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-white flex items-center">
+                  <i class="fas fa-chart-simple text-cyan-400 mr-3"></i>
+                  Voice Analysis
+                </h3>
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Processing
+                </span>
+              </div>
+              
+              <div class="space-y-6">
+                <div class="bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl p-5 border border-gray-700/50">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-300">Pitch Stability</span>
+                    <span class="text-sm font-semibold text-violet-400">94%</span>
+                  </div>
+                  <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div class="progress-bar h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full pulse-glow" style="width: 94%"></div>
+                  </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl p-5 border border-gray-700/50">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-300">Emotion Retention</span>
+                    <span class="text-sm font-semibold text-cyan-400">89%</span>
+                  </div>
+                  <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div class="progress-bar h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full pulse-glow" style="width: 89%"></div>
+                  </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl p-5 border border-gray-700/50">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-300">Language Mapping</span>
+                    <span class="text-sm font-semibold text-indigo-400">97%</span>
+                  </div>
+                  <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div class="progress-bar h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full pulse-glow" style="width: 97%"></div>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="bg-gradient-to-br from-violet-500/10 to-violet-500/5 rounded-lg p-4 border border-violet-500/20 text-center">
+                    <i class="fas fa-waveform-lines text-2xl text-violet-400 mb-2"></i>
+                    <p class="text-xs text-gray-400 mb-1">Frequency</p>
+                    <p class="text-sm font-semibold text-white">440 Hz</p>
+                  </div>
+                  <div class="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 rounded-lg p-4 border border-cyan-500/20 text-center">
+                    <i class="fas fa-volume-high text-2xl text-cyan-400 mb-2"></i>
+                    <p class="text-xs text-gray-400 mb-1">Amplitude</p>
+                    <p class="text-sm font-semibold text-white">-12 dB</p>
+                  </div>
+                  <div class="bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 rounded-lg p-4 border border-indigo-500/20 text-center">
+                    <i class="fas fa-clock text-2xl text-indigo-400 mb-2"></i>
+                    <p class="text-xs text-gray-400 mb-1">Duration</p>
+                    <p class="text-sm font-semibold text-white">45s</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass-card rounded-2xl p-6 fade-in">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-semibold text-white flex items-center">
+                <i class="fas fa-play-circle text-indigo-400 mr-3"></i>
+                Voice Preview
+              </h3>
+              <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-300 border border-green-500/30">
+                <i class="fas fa-check-circle mr-1"></i>Ready
+              </span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl p-5 border border-gray-700/50 hover:border-violet-500/50 transition-all cursor-pointer">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-sm font-medium text-gray-300">Sample Phrase 1</span>
+                  <button class="w-10 h-10 rounded-full bg-violet-500 hover:bg-violet-600 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-play text-sm"></i>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-400 mb-3">"Hello, this is a test of the cloned voice system."</p>
+                <div class="flex items-center space-x-2 text-xs text-gray-500">
+                  <i class="fas fa-clock"></i>
+                  <span>3.2s</span>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl p-5 border border-gray-700/50 hover:border-cyan-500/50 transition-all cursor-pointer">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-sm font-medium text-gray-300">Sample Phrase 2</span>
+                  <button class="w-10 h-10 rounded-full bg-cyan-500 hover:bg-cyan-600 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-play text-sm"></i>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-400 mb-3">"The quick brown fox jumps over the lazy dog."</p>
+                <div class="flex items-center space-x-2 text-xs text-gray-500">
+                  <i class="fas fa-clock"></i>
+                  <span>2.8s</span>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-br from-gray-900/50 to-gray-800/50 rounded-xl p-5 border border-gray-700/50 hover:border-indigo-500/50 transition-all cursor-pointer">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-sm font-medium text-gray-300">Sample Phrase 3</span>
+                  <button class="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white transition-all">
+                    <i class="fas fa-play text-sm"></i>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-400 mb-3">"Welcome to the future of voice technology."</p>
+                <div class="flex items-center space-x-2 text-xs text-gray-500">
+                  <i class="fas fa-clock"></i>
+                  <span>3.5s</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-6 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <button class="px-6 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium transition-all flex items-center space-x-2">
+                  <i class="fas fa-download"></i>
+                  <span>Export Voice</span>
+                </button>
+                <button class="px-6 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium transition-all flex items-center space-x-2">
+                  <i class="fas fa-share-nodes"></i>
+                  <span>Share</span>
+                </button>
+              </div>
+              <button id="deployButton" onclick="deployVoice()" class="glow-button px-8 py-3 rounded-xl text-white font-medium flex items-center space-x-2">
+                <i class="fas fa-rocket"></i>
+                <span>Deploy Voice</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Backend API URL
+    const API_BASE_URL = 'http://localhost:8000/api';
+    let uploadedVoiceSampleId = null;
+    let cloneId = null;
+    let isRecording = false;
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('description', 'Voice sample for cloning');
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/voice/clone/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          uploadedVoiceSampleId = data.voice_sample_id;
+          alert('Voice sample uploaded successfully!');
+          updateUploadStatus('uploaded');
+        } else {
+          throw new Error(data.detail || 'Upload failed');
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('Failed to upload voice sample. Please try again.');
+      }
+    }
+
+    async function toggleRecording() {
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('file', audioBlob, 'recording.wav');
+            formData.append('description', 'Recorded voice sample');
+
+            try {
+              const response = await fetch(`${API_BASE_URL}/voice/clone/upload`, {
+                method: 'POST',
+                body: formData
+              });
+
+              const data = await response.json();
+
+              if (response.ok) {
+                uploadedVoiceSampleId = data.voice_sample_id;
+                alert('Recording uploaded successfully!');
+                updateUploadStatus('uploaded');
+              } else {
+                throw new Error(data.detail || 'Upload failed');
+              }
+            } catch (error) {
+              console.error('Error uploading recording:', error);
+              alert('Failed to upload recording.');
+            }
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          document.getElementById('recordButtonText').textContent = 'Stop Recording';
+          document.getElementById('recordButton').classList.remove('glow-button');
+          document.getElementById('recordButton').classList.add('bg-red-600');
+        } catch (error) {
+          console.error('Error accessing microphone:', error);
+          alert('Failed to access microphone. Please check permissions.');
+        }
+      } else {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+        isRecording = false;
+        document.getElementById('recordButtonText').textContent = 'Start Recording';
+        document.getElementById('recordButton').classList.remove('bg-red-600');
+        document.getElementById('recordButton').classList.add('glow-button');
+      }
+    }
+
+    async function deployVoice() {
+      if (!uploadedVoiceSampleId) {
+        alert('Please upload a voice sample first.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/voice/clone/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            voice_sample_id: uploadedVoiceSampleId,
+            name: 'My Voice Clone'
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          cloneId = data.clone_id;
+          alert('Voice clone creation started! Processing...');
+          checkCloneStatus();
+        } else {
+          throw new Error(data.detail || 'Failed to create clone');
+        }
+      } catch (error) {
+        console.error('Error creating voice clone:', error);
+        alert('Failed to create voice clone. Please try again.');
+      }
+    }
+
+    async function checkCloneStatus() {
+      if (!cloneId) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/voice/clone/status/${cloneId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          if (data.status === 'ready') {
+            alert('Voice clone is ready!');
+            updateCloneStatus('ready');
+          } else if (data.status === 'processing') {
+            setTimeout(checkCloneStatus, 5000); // Check again in 5 seconds
+            updateCloneStatus('processing', data.progress_percent);
+          } else if (data.status === 'failed') {
+            alert('Voice clone creation failed: ' + (data.error || 'Unknown error'));
+            updateCloneStatus('failed');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking clone status:', error);
+      }
+    }
+
+    function updateUploadStatus(status) {
+      const statusBadge = document.querySelector('.bg-cyan-500\\/20');
+      if (statusBadge) {
+        statusBadge.textContent = status === 'uploaded' ? 'Uploaded' : 'Ready';
+      }
+    }
+
+    function updateCloneStatus(status, progress = null) {
+      const statusBadge = document.querySelector('.bg-green-500\\/20');
+      if (statusBadge) {
+        if (status === 'ready') {
+          statusBadge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Ready';
+        } else if (status === 'processing') {
+          statusBadge.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i>Processing ${progress ? progress + '%' : ''}`;
+        } else if (status === 'failed') {
+          statusBadge.innerHTML = '<i class="fas fa-times-circle mr-1"></i>Failed';
+        }
+      }
+    }
+
+    // Preview voice functionality
+    async function previewVoice(text) {
+      if (!cloneId) {
+        alert('Please create a voice clone first.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/voice/clone/preview`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            voice_id: cloneId,
+            text: text || 'Hello, this is a test of the cloned voice system.'
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.audio_url) {
+          const audio = new Audio(data.audio_url);
+          audio.play();
+        } else {
+          throw new Error(data.detail || 'Preview failed');
+        }
+      } catch (error) {
+        console.error('Error previewing voice:', error);
+        alert('Failed to preview voice.');
+      }
+    }
+
+    // Add preview functionality to preview buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      const previewButtons = document.querySelectorAll('button[class*="rounded-full"]');
+      previewButtons.forEach(button => {
+        if (button.querySelector('.fa-play')) {
+          button.addEventListener('click', (e) => {
+            const textElement = button.closest('.bg-gradient-to-br').querySelector('p.text-xs');
+            if (textElement) {
+              previewVoice(textElement.textContent);
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

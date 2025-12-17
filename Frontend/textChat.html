@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Chat - MyDigitalTwin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+        .message-enter { animation: fadeSlideIn 0.4s ease-out; }
+        .glow-border { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+        .glow-hover:hover { box-shadow: 0 0 25px rgba(139, 92, 246, 0.5); transition: all 0.3s ease; }
+        .typing-dot { animation: typing 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #000000 100%); }
+        .glass { background: rgba(30, 27, 75, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(139, 92, 246, 0.2); }
+        .glass-dark { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(139, 92, 246, 0.15); }
+        .message-user { background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); }
+        .message-twin { background: rgba(30, 27, 75, 0.8); border: 1px solid rgba(139, 92, 246, 0.3); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); }
+        .scrollbar-custom::-webkit-scrollbar { width: 8px; }
+        .scrollbar-custom::-webkit-scrollbar-track { background: rgba(30, 27, 75, 0.3); border-radius: 4px; }
+        .scrollbar-custom::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 4px; }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.7); }
+    </style>
+</head>
+<body class="gradient-bg text-white font-sans m-0 p-0" style="height: auto; min-height: 100%;">
+    <div class="flex flex-col h-screen">
+        <header class="glass fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">MyDigitalTwin</span>
+                </div>
+                <div class="h-6 w-px bg-violet-500/30"></div>
+                <span class="text-gray-300 font-medium">Text Chat Session</span>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <div class="glass px-4 py-2 rounded-full flex items-center space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                    <span class="text-sm text-green-400 font-medium">Online</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <select class="glass px-4 py-2 rounded-lg text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500">
+                    <option>English</option>
+                    <option>Hindi</option>
+                    <option>Spanish</option>
+                </select>
+                
+                <select class="glass px-4 py-2 rounded-lg text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500">
+                    <option>Gemini Model</option>
+                    <option>Twin Model</option>
+                </select>
+                
+                <div class="relative group">
+                    <button class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center glow-hover">
+                        <i class="fas fa-user text-white"></i>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 glass rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                        <a href="userProfilr.html" class="block px-4 py-3 hover:bg-violet-500/20 rounded-t-lg transition-colors"><i class="fas fa-user-circle mr-2"></i>Profile</a>
+                        <a href="settings.html" class="block px-4 py-3 hover:bg-violet-500/20 transition-colors"><i class="fas fa-cog mr-2"></i>Settings</a>
+                        <a href="login.html" class="block px-4 py-3 hover:bg-violet-500/20 rounded-b-lg transition-colors"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-1 pt-20">
+            <aside class="w-64 glass-dark flex flex-col fixed left-0 top-20 bottom-0 z-40">
+                <nav class="flex-1 px-4 py-6 space-y-2">
+                    <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-violet-500/20 transition-all glow-hover">
+                        <i class="fas fa-th-large text-violet-400 w-5"></i>
+                        <span class="text-gray-300">Dashboard</span>
+                    </a>
+                    <a href="textChat.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-violet-500/30 glow-border">
+                        <i class="fas fa-comments text-violet-400 w-5"></i>
+                        <span class="text-white font-medium">Text Chat</span>
+                    </a>
+                    <a href="voiceChat.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-violet-500/20 transition-all glow-hover">
+                        <i class="fas fa-microphone text-violet-400 w-5"></i>
+                        <span class="text-gray-300">Live Voice Chat</span>
+                    </a>
+                    <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-violet-500/20 transition-all glow-hover">
+                        <i class="fas fa-database text-violet-400 w-5"></i>
+                        <span class="text-gray-300">Memory Vault</span>
+                    </a>
+                    <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-violet-500/20 transition-all glow-hover">
+                        <i class="fas fa-user-cog text-violet-400 w-5"></i>
+                        <span class="text-gray-300">Twin Settings</span>
+                    </a>
+                    <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-violet-500/20 transition-all glow-hover">
+                        <i class="fas fa-shield-alt text-violet-400 w-5"></i>
+                        <span class="text-gray-300">Privacy & Security</span>
+                    </a>
+                </nav>
+                
+                <div class="px-4 py-6 border-t border-violet-500/20">
+                    <a href="login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-red-500/20 transition-all">
+                        <i class="fas fa-sign-out-alt text-red-400 w-5"></i>
+                        <span class="text-gray-300">Logout</span>
+                    </a>
+                </div>
+            </aside>
+
+            <main class="flex-1 ml-64 mr-80 px-6 py-6 flex flex-col">
+                <div class="glass glow-border rounded-2xl flex-1 flex flex-col overflow-hidden">
+                    <div class="flex-1 overflow-y-auto scrollbar-custom px-6 py-6 space-y-4" id="chatContainer">
+                        <!-- Messages will appear here dynamically -->
+                        <div class="text-center text-gray-500 py-12" id="emptyState">
+                            <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
+                            <p class="text-lg mb-2">Start a conversation</p>
+                            <p class="text-sm">Send a message to begin chatting with your digital twin</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-dark border-t border-violet-500/20 px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <button class="w-10 h-10 glass rounded-lg flex items-center justify-center hover:bg-violet-500/20 transition-all glow-hover">
+                                <i class="fas fa-paperclip text-violet-400"></i>
+                            </button>
+                            
+                            <div class="flex-1 relative">
+                                <input type="text" id="messageInput" placeholder="Ask your twin anything..." class="w-full glass px-5 py-3 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all" onkeypress="handleKeyPress(event)">
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+                                    <span class="text-xs text-gray-500 flex items-center space-x-1">
+                                        <i class="fas fa-lock text-green-400"></i>
+                                        <span>Encrypted</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <button class="w-10 h-10 glass rounded-lg flex items-center justify-center hover:bg-violet-500/20 transition-all glow-hover">
+                                <i class="fas fa-save text-cyan-400"></i>
+                            </button>
+                            
+                            <button id="sendButton" onclick="sendMessage()" class="w-12 h-12 bg-gradient-to-br from-violet-500 to-cyan-500 rounded-xl flex items-center justify-center glow-hover shadow-lg">
+                                <i class="fas fa-paper-plane text-white"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="w-80 glass-dark fixed right-0 top-20 bottom-0 px-6 py-6 space-y-4 overflow-y-auto scrollbar-custom">
+                <div class="glass rounded-xl p-5 glow-border">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-violet-400">Conversation Summary</h3>
+                        <i class="fas fa-chart-line text-cyan-400"></i>
+                    </div>
+                    <div class="space-y-3 text-sm text-gray-300" id="conversationSummary">
+                        <div class="flex justify-between">
+                            <span>Messages:</span>
+                            <span class="text-violet-400 font-medium" id="messageCount">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Duration:</span>
+                            <span class="text-violet-400 font-medium" id="duration">0 min</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Topic:</span>
+                            <span class="text-violet-400 font-medium" id="topic">-</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Backend API URL - adjust if your backend runs on a different port
+        const API_BASE_URL = 'http://localhost:8000/api';
+        
+        let messageCount = 0;
+        let selectedLanguage = 'en';
+        let selectedModel = null;
+        let conversationStartTime = null;
+
+        // Load languages and models on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadLanguages();
+            await loadModels();
+        });
+
+        async function loadLanguages() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/languages`);
+                const data = await response.json();
+                const languageSelect = document.querySelector('select');
+                if (languageSelect && data.languages) {
+                    languageSelect.innerHTML = '';
+                    data.languages.forEach(lang => {
+                        const option = document.createElement('option');
+                        option.value = lang.code || lang;
+                        option.textContent = lang.name || lang;
+                        languageSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load languages:', error);
+            }
+        }
+
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/models`);
+                const data = await response.json();
+                const modelSelects = document.querySelectorAll('select');
+                if (modelSelects.length > 1 && data.models) {
+                    const modelSelect = modelSelects[1];
+                    modelSelect.innerHTML = '';
+                    data.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.id || model;
+                        option.textContent = model.name || model;
+                        modelSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load models:', error);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Get selected language and model
+            const languageSelect = document.querySelector('select');
+            const modelSelect = document.querySelectorAll('select')[1];
+            const language = languageSelect ? languageSelect.value : 'en';
+            const model = modelSelect ? modelSelect.value : null;
+
+            // Disable input and button
+            input.disabled = true;
+            document.getElementById('sendButton').disabled = true;
+
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        language: language,
+                        model: model
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Remove typing indicator
+                    hideTypingIndicator();
+                    // Add AI response to chat
+                    addMessageToChat(data.response, 'ai');
+                    messageCount++;
+                    updateConversationSummary();
+                } else {
+                    throw new Error(data.detail || 'Failed to get response');
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
+                console.error('Error sending message:', error);
+            } finally {
+                // Re-enable input and button
+                input.disabled = false;
+                document.getElementById('sendButton').disabled = false;
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function addMessageToChat(message, type) {
+            const chatContainer = document.getElementById('chatContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Remove empty state when first message is added
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${type === 'user' ? 'justify-end' : 'justify-start'} message-enter`;
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            if (type === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="max-w-md">
+                        <div class="message-user rounded-2xl rounded-tr-sm px-5 py-3 shadow-lg">
+                            <p class="text-white">${escapeHtml(message)}</p>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1 text-right">${timeString}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="max-w-md">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-brain text-white text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="message-twin rounded-2xl rounded-tl-sm px-5 py-3">
+                                    <p class="text-gray-100">${escapeHtml(message)}</p>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">${timeString}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const chatContainer = document.getElementById('chatContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Remove empty state if it exists
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'flex justify-start';
+            typingDiv.innerHTML = `
+                <div class="flex items-center space-x-3 px-5 py-3 glass-dark rounded-2xl">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-xs"></i>
+                    </div>
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-violet-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-violet-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-violet-400 rounded-full typing-dot"></div>
+                    </div>
+                    <span class="text-sm text-gray-400">Your twin is thinking...</span>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function updateConversationSummary() {
+            // Update message count
+            const messageCountElement = document.getElementById('messageCount');
+            if (messageCountElement) {
+                messageCountElement.textContent = messageCount;
+            }
+            
+            // Update duration
+            if (conversationStartTime) {
+                const durationElement = document.getElementById('duration');
+                if (durationElement) {
+                    const minutes = Math.floor((Date.now() - conversationStartTime) / 60000);
+                    durationElement.textContent = `${minutes} min`;
+                }
+            } else {
+                conversationStartTime = Date.now();
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

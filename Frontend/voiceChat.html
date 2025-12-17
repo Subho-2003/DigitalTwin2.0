@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%; overflow: hidden;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Voice Session - MyDigitalTwin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        @keyframes waveform {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1); }
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .voice-core-idle { animation: breathe 4s ease-in-out infinite; }
+        .voice-core-listening .waveform { animation: waveform 0.3s ease-in-out infinite; }
+        .voice-core-speaking { animation: breathe 1.5s ease-in-out infinite; }
+        .voice-core-thinking::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: rgba(139, 92, 246, 0.6);
+            animation: rotate 2s linear infinite;
+        }
+        /* Hide Vapi widget's default button */
+        [data-vapi-widget] {
+            display: none !important;
+        }
+        .vapi-widget-button {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 font-sans antialiased" style="height: 100vh; overflow: hidden;">
+    <div class="flex" style="height: 100vh; overflow: hidden;">
+        <!-- LEFT SIDEBAR -->
+        <aside class="w-64 bg-gray-900 flex flex-col border-r border-gray-800" style="height: 100vh; overflow-y: auto;">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">MyDigitalTwin</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-all duration-200">
+                    <i class="fas fa-th-large w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="textChat.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-all duration-200">
+                    <i class="fas fa-comments w-5"></i>
+                    <span>Text Chat</span>
+                </a>
+                <a href="voiceChat.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-gradient-to-r from-indigo-600/20 to-violet-600/20 text-indigo-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
+                    <i class="fas fa-microphone w-5"></i>
+                    <span class="font-medium">Live Voice Chat</span>
+                </a>
+                <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-all duration-200">
+                    <i class="fas fa-database w-5"></i>
+                    <span>Memory Vault</span>
+                </a>
+                <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-all duration-200">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Twin Settings</span>
+                </a>
+                <a href="settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-all duration-200">
+                    <i class="fas fa-shield-alt w-5"></i>
+                    <span>Privacy & Security</span>
+                </a>
+            </nav>
+
+            <!-- User Profile -->
+            <div class="p-4 border-t border-gray-800">
+                <a href="login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-all duration-200">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col" style="height: 100vh; overflow: hidden;">
+            <!-- HEADER -->
+            <header class="bg-gray-900/80 backdrop-blur-xl border-b border-gray-800 px-6 py-3 flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <h1 class="text-xl font-bold text-gray-100">Live Voice Session</h1>
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full border border-green-500/30">
+                            <i class="fas fa-circle text-xs mr-1"></i>Listening
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <!-- Language & Voice Selection -->
+                        <select class="bg-gray-800 text-gray-300 px-3 py-1.5 rounded-lg border border-gray-700 focus:outline-none focus:border-indigo-500 text-xs">
+                            <option>English (US)</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                            <option>German</option>
+                        </select>
+                        <select class="bg-gray-800 text-gray-300 px-3 py-1.5 rounded-lg border border-gray-700 focus:outline-none focus:border-indigo-500 text-xs">
+                            <option>Your Twin Voice</option>
+                            <option>Voice Clone 1</option>
+                            <option>Voice Clone 2</option>
+                        </select>
+                        <button class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-200 hover:bg-gray-700 transition-all duration-200">
+                            <i class="fas fa-cog text-sm"></i>
+                        </button>
+                        <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                            JD
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- VOICE CHAT AREA -->
+            <div class="flex flex-1" style="overflow: hidden; min-height: 0;">
+                <!-- CENTER: VOICE CORE -->
+                <div class="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-indigo-950/30 to-violet-950/20 relative" style="overflow: hidden;">
+                    <!-- Background Glow -->
+                    <div class="absolute inset-0 bg-gradient-radial from-indigo-500/10 via-transparent to-transparent"></div>
+                    
+                    <!-- Voice Core -->
+                    <div class="relative z-10 voice-core-idle mb-6">
+                        <!-- Outer Ring -->
+                        <div class="w-64 h-64 rounded-full border-2 border-indigo-500/40 flex items-center justify-center relative shadow-2xl shadow-indigo-500/20">
+                            <!-- Inner Glow -->
+                            <div class="absolute inset-6 rounded-full bg-gradient-to-br from-indigo-500/20 to-violet-500/20 blur-xl"></div>
+                            
+                            <!-- Waveform Container -->
+                            <div class="relative flex items-center justify-center space-x-1.5">
+                                <div class="waveform w-1 h-8 bg-gradient-to-t from-indigo-400 to-violet-400 rounded-full"></div>
+                                <div class="waveform w-1 h-14 bg-gradient-to-t from-indigo-400 to-violet-400 rounded-full" style="animation-delay: 0.1s;"></div>
+                                <div class="waveform w-1 h-10 bg-gradient-to-t from-indigo-400 to-violet-400 rounded-full" style="animation-delay: 0.2s;"></div>
+                                <div class="waveform w-1 h-16 bg-gradient-to-t from-indigo-400 to-violet-400 rounded-full" style="animation-delay: 0.3s;"></div>
+                                <div class="waveform w-1 h-10 bg-gradient-to-t from-indigo-400 to-violet-400 rounded-full" style="animation-delay: 0.4s;"></div>
+                                <div class="waveform w-1 h-14 bg-gradient-to-t from-indigo-400 to-violet-400 rounded-full" style="animation-delay: 0.5s;"></div>
+                                <div class="waveform w-1 h-8 bg-gradient-to-t from-indigo-400 to-violet-400 rounded-full" style="animation-delay: 0.6s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Text -->
+                    <p class="text-gray-400 text-base mb-8">Your twin is listening...</p>
+
+                    <!-- Voice Controls -->
+                    <div class="flex items-center space-x-3 bg-gray-900/90 backdrop-blur-xl px-6 py-3 rounded-2xl border border-gray-800 shadow-2xl">
+                        <button id="startButton" onclick="startVoiceSession()" class="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-indigo-500/30">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="w-12 h-12 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-200 transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button class="w-12 h-12 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-200 transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-microphone-slash"></i>
+                        </button>
+                        <button id="stopButton" onclick="stopVoiceSession()" class="w-12 h-12 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-red-500/30" style="display: none;">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+
+                    <!-- Privacy Controls -->
+                    <div class="absolute bottom-6 right-6 flex flex-col space-y-2">
+                        <div class="flex items-center space-x-2 bg-gray-900/90 backdrop-blur-xl px-3 py-2 rounded-lg border border-gray-800">
+                            <input type="checkbox" id="saveMemory" class="w-3.5 h-3.5 accent-indigo-600">
+                            <label for="saveMemory" class="text-xs text-gray-400 cursor-pointer">Save to Memory</label>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-gray-900/90 backdrop-blur-xl px-3 py-2 rounded-lg border border-gray-800 group cursor-pointer relative">
+                            <i class="fas fa-lock text-green-400 text-xs"></i>
+                            <span class="text-xs text-gray-400">Encrypted</span>
+                            <div class="hidden group-hover:block absolute right-0 bottom-full mb-2 w-44 bg-gray-800 text-xs text-gray-300 p-2 rounded-lg shadow-xl border border-gray-700">
+                                End-to-end encrypted conversation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: TRANSCRIPT PANEL -->
+                <div class="w-80 bg-gray-900 border-l border-gray-800 flex flex-col" style="height: 100%; overflow: hidden;">
+                    <!-- Panel Header -->
+                    <div class="p-4 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
+                        <h3 class="text-base font-semibold text-gray-200">Live Transcript</h3>
+                        <button class="text-gray-400 hover:text-gray-200 transition-colors">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- Transcript Content -->
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3" id="transcriptContainer" style="min-height: 0; overflow-y: auto;">
+                        <!-- Transcript will be populated dynamically -->
+                        <div class="text-center text-gray-500 text-sm py-8">
+                            <i class="fas fa-comments text-2xl mb-2"></i>
+                            <p>Transcript will appear here during your conversation</p>
+                        </div>
+                    </div>
+
+                    <!-- Auto-scroll indicator -->
+                    <div class="p-2 border-t border-gray-800 text-center flex-shrink-0">
+                        <span class="text-xs text-gray-500">Auto-scrolling enabled</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vapi Web SDK Integration - Using Official Widget (No CDN Issues) -->
+    <!-- Load Vapi Widget SDK (handles all dependencies automatically) -->
+    <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js" defer async></script>
+    
+    <script>
+        // Configuration
+        const VAPI_PUBLIC_KEY = '34f0859f-e2f6-4fea-a9a9-6d7e0eb28c47';
+        const VAPI_ASSISTANT_ID = '99fb9a3d-f701-494e-9acb-073f9ed4be14';
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const DEFAULT_USER_ID = 1;
+        
+        // Store transcript (global scope so saveConversationToBackend can access it)
+        let fullTranscript = [];
+        let isRecording = false;
+        let vapiInstance = null;
+        let listenersSetup = false; // Flag to prevent duplicate listener setup
+        
+        // Wait for Vapi SDK to load
+        window.addEventListener('load', function() {
+            if (window.vapiSDK) {
+                // Initialize Vapi using widget SDK
+                vapiInstance = window.vapiSDK.run({
+                    apiKey: VAPI_PUBLIC_KEY,
+                    assistant: VAPI_ASSISTANT_ID,
+                    config: {
+                        // Hide the default widget button - we use our custom buttons
+                        button: {
+                            style: {
+                                display: 'none'
+                            }
+                        }
+                    }
+                });
+                
+                // Also hide any Vapi widget buttons that might appear
+                setTimeout(() => {
+                    const vapiButtons = document.querySelectorAll('[data-vapi-widget], .vapi-widget-button, [class*="vapi"], [id*="vapi"]');
+                    vapiButtons.forEach(btn => {
+                        if (btn.style) {
+                            btn.style.display = 'none';
+                        }
+                    });
+                }, 1000);
+                
+                console.log('✅ Vapi Widget SDK loaded and initialized');
+                
+                // Make globally accessible
+                window.vapiInstance = vapiInstance;
+                window.VAPI_ASSISTANT_ID = VAPI_ASSISTANT_ID;
+                window.API_BASE_URL = API_BASE_URL;
+                window.DEFAULT_USER_ID = DEFAULT_USER_ID;
+                
+                // Set up event listeners
+                setupVapiListeners();
+                
+                // Initialize UI
+                updateStatus('stopped');
+                updateStatusText('Click the microphone to start...');
+            } else {
+                console.error('Vapi SDK not loaded. Waiting...');
+                // Retry after a delay
+                setTimeout(function() {
+                    if (window.vapiSDK) {
+                        vapiInstance = window.vapiSDK.run({
+                            apiKey: VAPI_PUBLIC_KEY,
+                            assistant: VAPI_ASSISTANT_ID,
+                            config: {}
+                        });
+                        setupVapiListeners();
+                        updateStatus('stopped');
+                        updateStatusText('Click the microphone to start...');
+                    } else {
+                        alert('Failed to load Vapi SDK. Please refresh the page.');
+                    }
+                }, 2000);
+            }
+        });
+        
+        function setupVapiListeners() {
+            if (!vapiInstance) return;
+            
+            // Prevent duplicate listener setup
+            if (listenersSetup) {
+                console.log('Listeners already set up, skipping...');
+                return;
+            }
+            
+            listenersSetup = true; // Mark as set up
+            
+            // fullTranscript and isRecording are already defined in global scope above
+            
+            // Make variables globally accessible
+            window.vapiInstance = vapiInstance;
+            window.VAPI_ASSISTANT_ID = VAPI_ASSISTANT_ID;
+            window.API_BASE_URL = API_BASE_URL;
+            window.DEFAULT_USER_ID = DEFAULT_USER_ID;
+            
+            // Log initialization
+            console.log('Vapi initialized with:', {
+                hasPublicKey: !!VAPI_PUBLIC_KEY,
+                assistantId: VAPI_ASSISTANT_ID,
+                apiBaseUrl: API_BASE_URL
+            });
+            
+            // Vapi Event Listeners (only set up once)
+            vapiInstance.on('call-start', () => {
+                console.log('Call started');
+                isRecording = true;
+                fullTranscript = []; // Clear transcript for new call
+                updateStatus('active');
+                updateStatusText('Your twin is listening...');
+                document.getElementById('startButton').style.display = 'none';
+                document.getElementById('stopButton').style.display = 'block';
+                addTranscript('Voice session started', 'system');
+            });
+
+            vapiInstance.on('call-end', async () => {
+                console.log('Call ended');
+                isRecording = false;
+                updateStatus('stopped');
+                updateStatusText('Session ended');
+                document.getElementById('startButton').style.display = 'block';
+                document.getElementById('stopButton').style.display = 'none';
+                addTranscript('Voice session ended', 'system');
+                
+                // Save conversation to backend if transcript exists
+                await saveConversationToBackend();
+            });
+
+            vapiInstance.on('message', (msg) => {
+                if (msg.type === 'transcript') {
+                    // Deduplicate: Check if we've already processed this exact message
+                    // Vapi sends incremental updates, so we only want the final version
+                    const transcriptKey = `${msg.role}-${msg.transcript}`;
+                    
+                    // Only process if this is a new/updated message
+                    // (Vapi sends incremental updates, so we check if transcript changed)
+                    const lastEntry = fullTranscript[fullTranscript.length - 1];
+                    const isNewMessage = !lastEntry || !lastEntry.includes(msg.transcript);
+                    
+                    if (isNewMessage) {
+                        // Build full conversation transcript
+                        const transcriptEntry = `${msg.role}: ${msg.transcript}\n`;
+                        
+                        // If last entry was from same role, replace it (incremental update)
+                        if (lastEntry && lastEntry.startsWith(`${msg.role}:`)) {
+                            fullTranscript[fullTranscript.length - 1] = transcriptEntry;
+                            // Remove last transcript from UI and add updated one
+                            const transcriptContainer = document.getElementById('transcriptContainer');
+                            if (transcriptContainer && transcriptContainer.lastChild) {
+                                transcriptContainer.removeChild(transcriptContainer.lastChild);
+                            }
+                        } else {
+                            fullTranscript.push(transcriptEntry);
+                        }
+                        
+                        // Display in UI
+                        const role = msg.role === 'user' ? 'user' : 'assistant';
+                        addTranscript(msg.transcript, role);
+                    }
+                    
+                    console.log(msg.role, msg.transcript);
+                }
+            });
+
+            vapiInstance.on('error', (error) => {
+                console.error('Vapi error:', error);
+                
+                // Log the full error structure including nested error.error
+                console.error('Error type:', error.type);
+                console.error('Error stage:', error.stage);
+                if (error.error) {
+                    console.error('Nested error object:', error.error);
+                    console.error('Nested error message:', error.error.message);
+                    console.error('Nested error code:', error.error.code);
+                    console.error('Nested error details:', JSON.stringify(error.error, null, 2));
+                }
+                console.error('Full error JSON:', JSON.stringify(error, null, 2));
+                
+                // Provide more specific error messages
+                let errorMessage = 'An error occurred with the voice chat.';
+                
+                if (error.type === 'daily-call-object-creation-error') {
+                    // Extract actual error message from nested error
+                    const actualError = error.error?.message || error.error?.code || 'Unknown Daily.co error';
+                    errorMessage = '❌ DAILY.CO CONNECTION ERROR\n\n';
+                    errorMessage += `Error: ${actualError}\n\n`;
+                    errorMessage += 'Most likely causes:\n\n';
+                    errorMessage += '1. 💰 INSUFFICIENT CREDITS\n';
+                    errorMessage += '   - Voice costs ~$0.1/minute\n';
+                    errorMessage += '   - Check: https://dashboard.vapi.ai → Bottom left "PAYG"\n';
+                    errorMessage += '   - Buy at least $5 credits for testing\n\n';
+                    errorMessage += '2. 🔑 WRONG API KEY\n';
+                    errorMessage += '   - You MUST use PUBLIC_API_KEY (not private)\n';
+                    errorMessage += '   - Check: https://dashboard.vapi.ai → Settings → API Keys\n';
+                    errorMessage += '   - Copy the PUBLIC key (safe for frontend)\n\n';
+                    errorMessage += '3. 🌐 NETWORK/FIREWALL ISSUE\n';
+                    errorMessage += '   - Daily.co WebRTC might be blocked\n';
+                    errorMessage += '   - Try different network or disable VPN\n\n';
+                    errorMessage += 'Check browser console (F12) for full error details.';
+                } else if (error.type === 'start-method-error') {
+                    const actualError = error.error?.message || error.error?.code || 'Unknown start error';
+                    errorMessage = '❌ FAILED TO START VOICE SESSION\n\n';
+                    errorMessage += `Error: ${actualError}\n\n`;
+                    errorMessage += 'Check:\n';
+                    errorMessage += '1. 💰 Credits available (buy at least $5)\n';
+                    errorMessage += '2. 🔑 Using PUBLIC_API_KEY (not private)\n';
+                    errorMessage += '3. ✅ Assistant is Published\n';
+                    errorMessage += '4. 🌐 Network connection is stable\n\n';
+                    errorMessage += 'Your assistant config is already correct!';
+                } else if (error.error) {
+                    const errorDetails = error.error.message || error.error.code || JSON.stringify(error.error);
+                    errorMessage = `❌ Error: ${errorDetails}\n\n`;
+                    errorMessage += 'Most likely: Credits issue or wrong API key.\n\n';
+                    errorMessage += 'Check:\n';
+                    errorMessage += '1. Credits: https://dashboard.vapi.ai → PAYG\n';
+                    errorMessage += '2. API Key: Use PUBLIC key (not private)\n';
+                    errorMessage += '3. Browser console (F12) for details';
+                }
+                
+                alert(errorMessage);
+                isRecording = false;
+                updateStatus('stopped');
+                document.getElementById('startButton').style.display = 'block';
+                document.getElementById('stopButton').style.display = 'none';
+            });
+        }
+        
+        // Save conversation to backend
+        window.saveConversationToBackend = async function() {
+                // Check if save memory checkbox is checked
+                const saveMemoryCheckbox = document.getElementById('saveMemory');
+                if (!saveMemoryCheckbox || !saveMemoryCheckbox.checked) {
+                    console.log('Memory save is disabled by user');
+                    return;
+                }
+
+                // Combine all transcript entries
+                const transcriptText = fullTranscript.join('');
+                
+                if (!transcriptText || transcriptText.trim().length === 0) {
+                    console.log('No transcript to save');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${API_BASE_URL}/memory/save`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: DEFAULT_USER_ID,
+                            assistant_id: VAPI_ASSISTANT_ID,
+                            transcript: transcriptText
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        console.log('Memory saved successfully:', result);
+                        // Show success notification
+                        addTranscript(`Conversation saved to memory. Summary: ${result.summary.substring(0, 50)}...`, 'system');
+                    } else {
+                        console.error('Failed to save memory:', result);
+                        addTranscript('Failed to save conversation to memory', 'system');
+                    }
+                } catch (error) {
+                    console.error('Error saving memory:', error);
+                    addTranscript('Error saving conversation to memory', 'system');
+                }
+            };
+
+        // UI Helper Functions
+        function updateStatus(status) {
+                const statusBadge = document.querySelector('.bg-green-500\\/20');
+                if (statusBadge) {
+                    const statusText = status === 'active' ? 'Listening' : status === 'stopped' ? 'Stopped' : 'Idle';
+                    statusBadge.innerHTML = `<i class="fas fa-circle text-xs mr-1"></i>${statusText}`;
+                    
+                    // Update badge color
+                    if (status === 'active') {
+                        statusBadge.className = 'px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full border border-green-500/30';
+                    } else {
+                        statusBadge.className = 'px-3 py-1 bg-gray-500/20 text-gray-400 text-xs font-medium rounded-full border border-gray-500/30';
+                    }
+                }
+            }
+
+        function updateStatusText(text) {
+                const statusTextElement = document.querySelector('.text-gray-400.text-base.mb-8');
+                if (statusTextElement) {
+                    statusTextElement.textContent = text;
+                }
+            }
+
+        function addTranscript(text, type) {
+                const transcriptContainer = document.getElementById('transcriptContainer');
+                if (!transcriptContainer) {
+                    console.error('Transcript container not found');
+                    return;
+                }
+
+                // Remove placeholder message if it exists
+                const placeholder = transcriptContainer.querySelector('.text-center.text-gray-500');
+                if (placeholder) {
+                    placeholder.remove();
+                }
+                
+                // Ensure container has space-y-3 class for spacing
+                if (!transcriptContainer.classList.contains('space-y-3')) {
+                    transcriptContainer.classList.add('space-y-3');
+                }
+
+                const transcriptDiv = document.createElement('div');
+                
+                if (type === 'system') {
+                    transcriptDiv.className = 'flex justify-center';
+                    transcriptDiv.innerHTML = `
+                        <div class="bg-gray-800/50 px-3 py-1.5 rounded-full max-w-xs">
+                            <p class="text-xs text-gray-400 text-center">${escapeHtml(text)}</p>
+                        </div>
+                    `;
+                } else {
+                    transcriptDiv.className = `flex ${type === 'user' ? 'justify-start' : 'justify-end'}`;
+                    
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                    if (type === 'user') {
+                        transcriptDiv.innerHTML = `
+                            <div class="bg-gray-800 px-3 py-2 rounded-2xl rounded-tl-sm max-w-xs">
+                                <p class="text-sm text-gray-300">${escapeHtml(text)}</p>
+                                <span class="text-xs text-gray-500 mt-1 block">${timeString}</span>
+                            </div>
+                        `;
+                    } else {
+                        transcriptDiv.innerHTML = `
+                            <div class="bg-gradient-to-br from-indigo-600 to-violet-600 px-3 py-2 rounded-2xl rounded-tr-sm max-w-xs">
+                                <p class="text-sm text-white">${escapeHtml(text)}</p>
+                                <span class="text-xs text-indigo-200 mt-1 block">${timeString}</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                transcriptContainer.appendChild(transcriptDiv);
+                transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
+            }
+
+        function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+        // Make helper functions globally accessible
+        window.updateStatus = updateStatus;
+        window.updateStatusText = updateStatusText;
+        window.addTranscript = addTranscript;
+        
+        // Global functions for HTML onclick handlers
+        window.startVoiceSession = async function() {
+            if (!vapiInstance) {
+                alert('Vapi SDK is still loading. Please wait a moment and try again.');
+                return;
+            }
+            
+            try {
+                console.log('Starting voice session with assistant:', VAPI_ASSISTANT_ID);
+                
+                // Check if microphone permission is granted
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop());
+                    console.log('Microphone permission granted');
+                } catch (permError) {
+                    alert('Microphone permission is required for voice chat. Please allow microphone access and try again.');
+                    console.error('Microphone permission error:', permError);
+                    return;
+                }
+                
+                // Start web voice call
+                // Widget SDK start() needs assistant ID passed
+                console.log('Calling vapiInstance.start() for web voice...');
+                vapiInstance.start(VAPI_ASSISTANT_ID);
+                console.log('Voice session start requested successfully');
+            } catch (error) {
+                console.error('Error starting voice session:', error);
+                alert(`Failed to start voice session: ${error.message || 'Unknown error'}`);
+            }
+        };
+        
+        window.stopVoiceSession = function() {
+            if (!vapiInstance) {
+                return;
+            }
+            
+            try {
+                vapiInstance.stop();
+                console.log('Voice session stopped');
+            } catch (error) {
+                console.error('Error stopping voice session:', error);
+            }
+        };
+    </script>
+</body>
+</html>
